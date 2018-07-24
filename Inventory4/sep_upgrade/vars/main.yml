@@ -1,0 +1,9 @@
+# This includes variables for the SEP role
+
+#########################################################
+
+vars_SymantecEndpointProtection_package: "SymantecEndpointProtection.zip"
+vars_NL_url: "https://lnx000165/pub/SEP_14_Packages/SymantecEndpointProtection_NL.zip"
+vars_IE_url: "https://lnx000165/pub/SEP_14_Packages/SymantecEndpointProtection_IE.zip"
+vars_tmpdir: "/tmp/sep_upgrade"
+vars_service: ['symcfgd','smcd','rtvscand']

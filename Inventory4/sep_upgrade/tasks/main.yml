@@ -1,0 +1,47 @@
+# This role install SEP client agents intall in the hosts
+
+#########################################################
+ 
+- name: checking the sav version
+  command: rpm -q sav
+  register: sav_check
+  ignore_errors: yes
+  changed_when: no
+
+- name: Gathering the sav group details
+  command: ./sav manage -g
+  args: 
+    chdir: /opt/Symantec/symantec_antivirus/
+  register: sav_group
+  ignore_errors: yes
+  changed_when: no
+
+- name: Creating directory for temporary storage
+  file: path=/tmp/sep_upgrade state=directory mode=0755
+
+- name: Download the SEP IE package based on group information
+  get_url: url={{ vars_IE_url }} dest={{ vars_tmpdir }}/SymantecEndpointProtection.zip validate_certs=no 
+  when: (sav_group.rc == 2) or (sav_group.stdout | search ("IE")) or (sav_group.rc == 0)
+
+- name: Download the SEP NL package based on group information
+  get_url: url={{ vars_NL_url }} dest={{ vars_tmpdir }}/SymantecEndpointProtection.zip validate_certs=no
+  when: (sav_group.stdout | search ("NL"))
+  ignore_errors: yes
+
+- name: unarchive the sep client packages
+  unarchive: src={{ vars_tmpdir }}/{{ vars_SymantecEndpointProtection_package }} dest="{{ vars_tmpdir }}/" copy=no
+
+- name: Un-installing the Previous SEP version
+  command: "bash {{ vars_tmpdir }}/install.sh -u"
+  when: (sav_check.stdout | search ("sav-12.1")) or (sav_check.stdout | search ("sav-14.0.2415-0200"))
+
+- name: Install the latest SEP version
+  command: "bash {{ vars_tmpdir }}/install.sh -i"
+  when: (sav_check.stdout.find('is not installed') != -1) or (sav_check.stdout | search ("sav-12.1")) or (sav_check.stdout | search ("sav-14.0.2415-0200"))
+
+- name: Check whether the required services are started
+  service: name={{ item }} state=started enabled=yes
+  with_items: "{{ vars_service }}"
+
+- name: Delete the temporary storage file
+  file: path="{{ vars_tmpdir }}" state=absent

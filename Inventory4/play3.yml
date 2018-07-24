@@ -1,0 +1,19 @@
+---
+# This Playbook includes roles for installing spacewalk,SEP and commvault agents in the Client host
+
+####################################################################################################
+
+- hosts: prod3
+  connection: ssh
+  become: yes
+  become_method: sudo
+  become_user: root
+
+
+  roles:
+  #- spacewalk       #Install spacewalk agents in Client machine
+  - sep_upgrade             #Symantec endpoint protection client install
+  #- hpomi           #Install the HPOMI Agents in the Client host
+  #- commvault       #commvault agent install in Client host
+  #- ad_integration_old   #Integrate Linux machine with AD Domain Controller
+  #- security_script   #This scipt performs security checkin the Postgersql server 
